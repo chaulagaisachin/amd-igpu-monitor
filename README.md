@@ -12,7 +12,7 @@ sysfs interface directly, so it needs no ROCm and no external tools.
 ## Install (from source)
 
 ```bash
-gnome-extensions pack --force --extra-source=gpuReader.js .
+gnome-extensions pack --force --extra-source=gpuReader.js --extra-source=icons .
 gnome-extensions install --force amd-igpu-monitor@chaulagaisachin.shell-extension.zip
 ```
 
