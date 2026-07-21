@@ -9,6 +9,10 @@ AGENTS.md
 # Superpowers workflow docs (design specs / plans) — kept on disk, out of the repo
 docs/superpowers/
 
+# Build / publish artifacts
+venv/
+*.shell-extension.zip
+
 # Editor / OS
 .DS_Store
 *.swp
