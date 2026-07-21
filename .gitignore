@@ -1,0 +1,15 @@
+# Claude Code / AI assistant artifacts
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+.cursor/
+.aider*
+
+# Superpowers workflow docs (design specs / plans) — kept on disk, out of the repo
+docs/superpowers/
+
+# Editor / OS
+.DS_Store
+*.swp
+*~
