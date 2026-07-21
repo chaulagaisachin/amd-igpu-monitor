@@ -18,7 +18,7 @@ check('formatVram MiB', formatVram(536870912) === '512 MiB');
 check('formatVram null', formatVram(null) === 'n/a');
 
 // Integration against the live amdgpu sysfs on this machine
-const info = readGpuInfo();
+const info = await readGpuInfo();
 check('readGpuInfo returns object', info !== null);
 if (info !== null) {
     check('usage 0..100', info.usage !== null && info.usage >= 0 && info.usage <= 100);

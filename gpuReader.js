@@ -1,23 +1,25 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
 
 const DRM_DIR = '/sys/class/drm';
 const _decoder = new TextDecoder();
 
 export function readText(path) {
-    try {
-        const [ok, bytes] = GLib.file_get_contents(path);
-        if (!ok)
-            return null;
-        return _decoder.decode(bytes).trim();
-    } catch (_e) {
-        return null;
-    }
+    const file = Gio.File.new_for_path(path);
+    return new Promise((resolve) => {
+        file.load_contents_async(null, (f, res) => {
+            try {
+                const [ok, bytes] = f.load_contents_finish(res);
+                resolve(ok ? _decoder.decode(bytes).trim() : null);
+            } catch (_e) {
+                resolve(null);
+            }
+        });
+    });
 }
 
-export function readNumber(path) {
-    const t = readText(path);
+export async function readNumber(path) {
+    const t = await readText(path);
     if (t === null)
         return null;
     const n = Number(t);
@@ -45,10 +47,10 @@ function _listMatching(dirPath, regex) {
     return names;
 }
 
-export function findAmdCardPath() {
+export async function findAmdCardPath() {
     for (const card of _listMatching(DRM_DIR, /^card\d+$/)) {
         const devicePath = `${DRM_DIR}/${card}/device`;
-        if (readText(`${devicePath}/vendor`) === '0x1002')
+        if (await readText(`${devicePath}/vendor`) === '0x1002')
             return devicePath;
     }
     return null;
@@ -68,29 +70,29 @@ export function formatVram(bytes) {
     return `${Math.round(mib)} MiB`;
 }
 
-export function readGpuInfo() {
-    const devicePath = findAmdCardPath();
+export async function readGpuInfo() {
+    const devicePath = await findAmdCardPath();
     if (devicePath === null)
         return null;
 
-    const usage = readNumber(`${devicePath}/gpu_busy_percent`);
-    const vramUsed = readNumber(`${devicePath}/mem_info_vram_used`);
-    const vramTotal = readNumber(`${devicePath}/mem_info_vram_total`);
-
-    let tempC = null, powerW = null, clockMHz = null;
     const hwmon = findHwmonPath(devicePath);
-    if (hwmon !== null) {
-        const t = readNumber(`${hwmon}/temp1_input`);
-        tempC = t === null ? null : Math.round(t / 1000);
+    const none = Promise.resolve(null);
 
-        let p = readNumber(`${hwmon}/power1_average`);
-        if (p === null)
-            p = readNumber(`${hwmon}/power1_input`);
-        powerW = p === null ? null : p / 1000000;
+    const [usage, vramUsed, vramTotal, tRaw, pAvg, pInput, fRaw] =
+        await Promise.all([
+            readNumber(`${devicePath}/gpu_busy_percent`),
+            readNumber(`${devicePath}/mem_info_vram_used`),
+            readNumber(`${devicePath}/mem_info_vram_total`),
+            hwmon ? readNumber(`${hwmon}/temp1_input`) : none,
+            hwmon ? readNumber(`${hwmon}/power1_average`) : none,
+            hwmon ? readNumber(`${hwmon}/power1_input`) : none,
+            hwmon ? readNumber(`${hwmon}/freq1_input`) : none,
+        ]);
 
-        const f = readNumber(`${hwmon}/freq1_input`);
-        clockMHz = f === null ? null : Math.round(f / 1000000);
-    }
+    const tempC = tRaw === null ? null : Math.round(tRaw / 1000);
+    const pRaw = pAvg === null ? pInput : pAvg;
+    const powerW = pRaw === null ? null : pRaw / 1000000;
+    const clockMHz = fRaw === null ? null : Math.round(fRaw / 1000000);
 
     return {usage, tempC, powerW, clockMHz, vramUsed, vramTotal};
 }

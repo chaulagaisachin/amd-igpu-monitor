@@ -83,7 +83,9 @@ export default class AmdIgpuMonitorExtension extends Extension {
         Main.panel.addToStatusArea(this.uuid, this._indicator);
 
         const tick = () => {
-            this._indicator.update(readGpuInfo());
+            readGpuInfo()
+                .then(info => this._indicator?.update(info))
+                .catch(() => this._indicator?.update(null));
             return GLib.SOURCE_CONTINUE;
         };
         tick();
