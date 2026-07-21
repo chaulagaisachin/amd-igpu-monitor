@@ -1,0 +1,10 @@
+.amd-igpu-panel-label {
+    margin-left: 4px;
+    font-feature-settings: "tnum";
+}
+
+.amd-igpu-value {
+    font-feature-settings: "tnum";
+    min-width: 96px;
+    text-align: right;
+}

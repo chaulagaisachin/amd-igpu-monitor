@@ -1,0 +1,7 @@
+{
+    "uuid": "amd-igpu-monitor@chaulagaisachin",
+    "name": "AMD iGPU Monitor",
+    "description": "Show AMD integrated GPU usage, temperature, power, clock and VRAM in the top bar. Reads amdgpu sysfs directly, with no ROCm or external tools.",
+    "shell-version": ["46", "47", "48"],
+    "url": "https://github.com/chaulagaisachin/amd-igpu-monitor"
+}
