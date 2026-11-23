@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 import Gio from 'gi://Gio';
 
-const DRM_DIR = '/sys/class/drm';
+const DEFAULT_DRM_DIR = '/sys/class/drm';
 const _decoder = new TextDecoder();
 
 export function readText(path) {
@@ -47,9 +47,9 @@ function _listMatching(dirPath, regex) {
     return names;
 }
 
-export async function findAmdCardPath() {
-    for (const card of _listMatching(DRM_DIR, /^card\d+$/)) {
-        const devicePath = `${DRM_DIR}/${card}/device`;
+export async function findAmdCardPath(drmDir = DEFAULT_DRM_DIR) {
+    for (const card of _listMatching(drmDir, /^card\d+$/)) {
+        const devicePath = `${drmDir}/${card}/device`;
         if (await readText(`${devicePath}/vendor`) === '0x1002')
             return devicePath;
     }
@@ -70,8 +70,27 @@ export function formatVram(bytes) {
     return `${Math.round(mib)} MiB`;
 }
 
-export async function readGpuInfo() {
-    const devicePath = await findAmdCardPath();
+export function formatPanelParts(info) {
+    if (info === null)
+        return null;
+    const usage = info.usage === null ? '-' : `${info.usage}%`;
+    const temp = info.tempC === null ? '-' : `${info.tempC}°C`;
+    const vram = (info.vramUsed === null || info.vramTotal === null)
+        ? '-'
+        : `${formatVram(info.vramUsed)} / ${formatVram(info.vramTotal)}`;
+    return {usage, temp, vram};
+}
+
+/** Single top-bar line: usage · temp · vram (one St.Label, no multi-actor clip). */
+export function formatPanelLine(info) {
+    const parts = formatPanelParts(info);
+    if (parts === null)
+        return null;
+    return `${parts.usage} · ${parts.temp} · ${parts.vram}`;
+}
+
+export async function readGpuInfo(drmDir = DEFAULT_DRM_DIR) {
+    const devicePath = await findAmdCardPath(drmDir);
     if (devicePath === null)
         return null;
 

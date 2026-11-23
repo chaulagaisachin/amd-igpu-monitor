@@ -1,10 +1,40 @@
+/* Panel metrics: icon+value pairs at natural width (no fixed px / no min-width: 0).
+ * Tight icon→value gap (~2px); larger gap between the three metric groups.
+ *
+ * Theme (Adwaita/Yaru) sets:
+ *   #panel .panel-button .system-status-icon { padding: 0 6px; margin: 0 4px; }
+ * which outranks a bare .amd-igpu-panel-icon rule. Match that specificity. */
+
+.amd-igpu-panel-box {
+    spacing: 0;
+}
+
 .amd-igpu-panel-label {
-    margin-left: 4px;
-    font-feature-settings: "tnum";
+    /* Icon-to-value pairing; keep small so each glyph reads with its number. */
+    margin-left: 2px;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.amd-igpu-metrics-box {
+    spacing: 0;
+}
+
+/* Beat theme system-status-icon margin/padding so icon→value lands ~2–4px. */
+#panel .panel-button .amd-igpu-panel-icon {
+    padding: 0;
+    margin: 0;
+}
+
+/* Gap before temp / VRAM groups (larger than icon→text). Same specificity
+ * as the zero-margin icon rule so margin-left wins for group starts. */
+#panel .panel-button .amd-igpu-metric-group {
+    margin-left: 10px;
 }
 
 .amd-igpu-value {
-    font-feature-settings: "tnum";
-    min-width: 96px;
+    /* em-based so popup values fit large GiB strings without a 2 GiB assumption */
+    min-width: 9em;
     text-align: right;
+    font-feature-settings: "tnum";
 }

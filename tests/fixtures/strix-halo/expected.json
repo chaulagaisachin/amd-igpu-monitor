@@ -1,0 +1,17 @@
+{
+  "usage": 0,
+  "tempC": 38,
+  "powerW": 15.589,
+  "clockMHz": 603,
+  "vramUsed": 413380608,
+  "vramTotal": 2147483648,
+  "panel": {
+    "usage": "0%",
+    "temp": "38°C",
+    "vram": "394 MiB / 2.0 GiB"
+  },
+  "formatVram": {
+    "used": "394 MiB",
+    "total": "2.0 GiB"
+  }
+}
